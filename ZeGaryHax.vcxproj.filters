@@ -65,6 +65,7 @@
     <ClCompile Include="Editor.cpp" />
     <ClCompile Include="xutil.cpp" />
     <ClCompile Include="ZeLogWindow.cpp" />
+    <ClCompile Include="GeckUtility.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ZeGaryHax.h" />

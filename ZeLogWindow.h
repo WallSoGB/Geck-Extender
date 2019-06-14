@@ -1,9 +1,4 @@
 #pragma once
-#pragma comment(lib, "comctl32.lib")
-#include <CommCtrl.h>
-#include <Richedit.h>
-#include <cstdint>
-#include "GECKUtility.h"
 
 #define UI_CMD_ADDLOGTEXT	(WM_APP + 1)
 #define UI_CMD_CLEARLOGTEXT (WM_APP + 2)
@@ -26,7 +21,6 @@
 #define ID_RENDERWINDOW_SHOWWATER_CHECKBOX	51015
 #define ID_RENDERWINDOW_SHOWPORTALS_CHECKBOX	51016
 
-
 // unused button in vanilla menu
 #define VIEW_RENDER_WINDOW 0x9D06
 
@@ -35,9 +29,6 @@ HWND g_ConsoleHwnd;
 HMENU g_ExtensionMenu;
 HMENU g_MainMenu;
 WNDPROC OldEditorUI_WndProc;
-
-NiPoint3 savedRenderPos;
-ViewMatrix savedRenderDirection;
 
 /* Additional Toolbar Controls */
 HWND g_trackBarHwnd;

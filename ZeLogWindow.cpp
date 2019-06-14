@@ -1,7 +1,15 @@
+#pragma comment(lib, "comctl32.lib")
+#include <CommCtrl.h>
+#include <Richedit.h>
+#include <cstdint>
 #include <regex>
-#include "ZeLogWindow.h"
 #include "Settings.h"
 #include "resource.h"
+#include "GECKUtility.h"
+#include "ZeLogWindow.h"
+
+NiPoint3 savedRenderPos;
+ViewMatrix savedRenderDirection;
 
 extern HANDLE	fontHandle;
 extern LOGFONT	fontInfo;

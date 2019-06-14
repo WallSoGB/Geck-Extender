@@ -2,22 +2,17 @@
 #pragma comment(lib, "libdeflate/libdeflatestatic.lib")
 
 #include <mutex>
-#include "Editor.h"
 #include "resource.h"
 #include "GECKUtility.h"
 #include "Settings.h"
+#include "ZeLogWindow.h"
 
 #define GH_NAME				"ZeGaryHax"		// this is the string for IsPluginInstalled and GetPluginVersion (also shows in nvse.log)
 #define GH_VERSION			0				// set this to 0 to enable log output from _DMESSAGE (useful for debug traces)
 
 HMODULE ZeGaryHaxHandle;
-extern HWND g_trackBarHwnd;
-extern HWND g_timeOfDayTextHwnd;
-extern HWND g_allowCellWindowLoadsButtonHwnd;
 
 IDebugLog		gLog("EditorWarnings.log");
-
-void PrintCmdTable();
 
 struct z_stream_s
 {
@@ -540,7 +535,6 @@ BOOL __stdcall hk_SearchAndReplaceCallback(HWND hDlg, UINT msg, WPARAM wParam, L
 
 _declspec(naked) void EndLoadingHook() {
 	PlaySound("MouseClick", NULL, SND_ASYNC);
-//	PrintCmdTable();
 	_asm {
 	originalCode:
 		add esp, 8

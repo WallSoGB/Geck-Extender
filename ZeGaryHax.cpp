@@ -19,8 +19,8 @@
 #include "nvse/GameRTTI.h"
 #include "nvse/SafeWrite.h"
 #include "nvse/ParamInfos.h"
-#include "xutil.h"
 
+#include "xutil.h"
 #include "ZeGaryHax.h"
 #include "ZeLogWindow.h"
 #include "ZeWarningPatches.h"
@@ -34,21 +34,15 @@ BOOL __stdcall ScriptEditCallback(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lPa
 	return ((BOOL(__stdcall*)(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam))(0x5C3D40))(hWnd, msg, wParam, lParam);
 }
 
-extern "C"
+extern "C" BOOL WINAPI DllMain(HANDLE  hDllHandle, DWORD dwReason, LPVOID lpreserved)
 {
-	  BOOL WINAPI DllMain(HANDLE  hDllHandle, DWORD dwReason, LPVOID lpreserved)
-    {
-        switch (dwReason)
-        {
-			case (DLL_PROCESS_ATTACH):
-				ZeGaryHaxHandle = (HMODULE)hDllHandle;
-				break;
-        }
-        return TRUE;
-    }
+	if (dwReason == DLL_PROCESS_ATTACH)
+		ZeGaryHaxHandle = (HMODULE)hDllHandle;
+	return TRUE;
 }
+   
 
-bool NVSEPlugin_Query(const NVSEInterface * nvse, PluginInfo * info)
+extern "C" bool NVSEPlugin_Query(const NVSEInterface * nvse, PluginInfo * info)
 {
 	if(!nvse->isEditor)
 	{
@@ -71,7 +65,7 @@ bool NVSEPlugin_Query(const NVSEInterface * nvse, PluginInfo * info)
     return true;
 }
 
-bool NVSEPlugin_Load(const NVSEInterface * nvse)
+extern "C" bool NVSEPlugin_Load(const NVSEInterface * nvse)
 {
 	if (!nvse->isEditor) return false;
 	savedNVSE = nvse;

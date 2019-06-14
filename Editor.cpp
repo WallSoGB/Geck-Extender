@@ -2,7 +2,8 @@
 #include <algorithm>
 #include <assert.h>
 #include <CommCtrl.h>
-#include "Editor.h"
+#include <nvse\SafeWrite.h> 
+#include "xutil.h"
 
 bool g_UseDeferredDialogInsert;
 HWND g_DeferredListView;
