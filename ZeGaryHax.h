@@ -1,8 +1,11 @@
 #pragma once
 #pragma comment(lib, "libdeflate/libdeflatestatic.lib")
 
+#include <mutex>
 #include "Editor.h"
 #include "resource.h"
+#include "GECKUtility.h"
+#include "Settings.h"
 
 #define GH_NAME				"ZeGaryHax"		// this is the string for IsPluginInstalled and GetPluginVersion (also shows in nvse.log)
 #define GH_VERSION			0				// set this to 0 to enable log output from _DMESSAGE (useful for debug traces)
@@ -61,43 +64,6 @@ char* nvseMSG[20] =
 	"RenameNewGameName",
 };
 
-int bPatchScriptEditorFont = 0;
-int bHighResLandscapeLOD = 0;
-int bListEditFix = 0;
-int bVersionControlMode = 0;
-int bFastExit = 0;
-int bIgnoreNAMFiles = 0;
-int bEnableSpellChecker = 1;
-int bAutoScroll = 1;
-int bRenderWindowUncap = 1;
-int bPreviewWindowUncap = 1;
-int bRemoveStatusBarLoadingText = 1;
-int bPlaySoundEndOfLoading = 1;
-int bNoDXSoundCaptureErrorPopup = 0;
-int bNoPreviewWindowAutoFocus = 1;
-int bNoLODMeshMessage = 0;
-int bSwapRenderCYKeys = 0;
-int bAutoLoadFiles = 0;
-int bShowLoadFilesAtStartup = 0;
-int bScriptCompileWarningPopup = 0;
-int bNoVersionControlWarning = 0;
-int bShowTimeOfDaySlider = 1;
-int bSkipVanillaLipGen = 0;
-int bShowAdditionalToolbarButtons = 0;
-int bAllowMultipleSearchAndReplace = 0;
-
-int bUseAltShiftMultipliers = 1;
-float fMovementAltMultiplier = 0.15F;
-float fMovementShiftMultiplier = 2.0F;
-
-int bSmoothFlycamRotation = 1;
-int bFlycamUpDownRelativeToWorld = 0;
-float fFlycamRotationSpeed;
-float fFlycamNormalMovementSpeed;
-float fFlycamShiftMovementSpeed;
-float fFlycamAltMovementSpeed;
-
-char filename[MAX_PATH];
 static const char *geckwikiurl = "https://geckwiki.com/index.php/";
 static const char *geckwikiscriptingurl = "https://geckwiki.com/index.php/Category:Scripting";
 static const char *geckwikicommandsurl = "https://geckwiki.com/index.php/Category:Commands";
@@ -126,19 +92,6 @@ static LOGFONT editorFont =
 	49,			// lfPitchAndFamily
 	"Consolas"	// lfFaceName[LF_FACESIZE]
 };
-
-#define INI_SETTING_NOT_FOUND -1
-int GetOrCreateINIInt(char* sectionName, char* keyName, int defaultValue, char* filename) {
-	int settingValue = GetPrivateProfileIntA(sectionName, keyName, INI_SETTING_NOT_FOUND, filename);
-	if (settingValue == INI_SETTING_NOT_FOUND) {
-		char arr[11];
-		WritePrivateProfileString(sectionName, keyName, itoa(defaultValue, arr, 10), filename);
-		settingValue = defaultValue;
-	}
-	return settingValue;
-}
-#undef INI_SETTING_NOT_FOUND
-
 
 static void DoModScriptWindow(HWND wnd)
 {
@@ -951,22 +904,20 @@ _declspec(naked) void LipGenCountTopicsHook() {
 
 }
 
-bool GetIsRenderWindowAllowCellLoads2() {
-	return (*(byte*)(0xECFCEC) >> 2) & 1;
-}
-
 void __fastcall PreferencesWindowApplyButtonHook(int* thiss, void* dummyEDX, int a2) {
 	((int(__thiscall*)(int* thiss, int a2))(0x855B30))(thiss, a2);
-	SendMessageA(g_allowCellWindowLoadsButtonHwnd, BM_SETCHECK, GetIsRenderWindowAllowCellLoads2(), NULL);
+	SendMessageA(g_allowCellWindowLoadsButtonHwnd, BM_SETCHECK, GetIsRenderWindowAllowCellLoads(), NULL);
 }
 
-/*
-void __cdecl CreateMainMenuToolbar(HWND hwnd) {
-	// adjust toolbar creation flags
-	SafeWrite32(0x465A06, 0x54000000 | CCS_TOP | TBSTYLE_TOOLTIPS /* custom flags: *//* | CCS_ADJUSTABLE | TBSTYLE_WRAPABLE);
-	((void(__cdecl*)(HWND hwnd))(0x4659E0))(hwnd);
-	HWND g_MainWindowToolbar = (HWND)0xECFC14;
+extern void EditorUI_Log(const char* format, ...);
+BOOL __stdcall RenderWindowCallbackHook(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
+	if (msg == WM_KEYDOWN) {
+		switch (wParam) {
+		case 'O':
+			SetIsShowLightMarkers(!GetIsShowLightMarkers());
+		}
+	}
+	return ((BOOL(__stdcall*)(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam))(0x455AA0))(hWnd, msg, wParam, lParam);
 }
-*/
 
 void __fastcall FastExitHook(volatile LONG** thiss);

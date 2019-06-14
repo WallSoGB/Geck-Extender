@@ -1,5 +1,5 @@
 #pragma once
-
+#include "Settings.h"
 /*
 //	Messages to fix/make more verbose
 

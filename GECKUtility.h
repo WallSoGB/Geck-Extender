@@ -1,11 +1,4 @@
 #pragma once
-#include "ZeLogWindow.h"
-
-HWND g_trackBarHwnd;
-HWND g_timeOfDayTextHwnd;
-HWND g_allowCellWindowLoadsButtonHwnd;
-HWND g_renderWindowShowWaterButtonHwnd;
-HWND g_renderWindowShowPortalsButtonHwnd;
 
 struct NiPoint3
 {
@@ -145,5 +138,16 @@ int GetPreviousRenderWindowHeight() {
 	return (*(int*)(0xED1448));
 }
 
+bool GetIsShowLightMarkers() {
+	return (*(byte*)(0xECEEBC));
+}
+
+void SetIsShowLightMarkers(bool state) {
+	(*(byte*)(0xECEEBC)) = state;
+	((void(*)(void))(0x416490))();
+}
+
 HWND g_renderWindowHwnd = (HWND)0xE0C1AA;
 HWND g_mainWindowToolbar = (HWND)0xECFC14;
+
+UInt32* (*LookupGeckFormByID)(UInt32 formID) = (UInt32 * (*)(UInt32))0x4F9620;

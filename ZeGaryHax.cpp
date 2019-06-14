@@ -6,7 +6,6 @@
 #include <unordered_map>
 #include <vector>
 #include <thread>
-#include <mutex>
 #include <atomic>
 #include <set>
 #include <string>
@@ -100,7 +99,6 @@ bool NVSEPlugin_Load(const NVSEInterface * nvse)
 	bSkipVanillaLipGen = GetOrCreateINIInt("General", "bSkipVanillaLipGen", 0, filename);
 	bShowAdditionalToolbarButtons = GetOrCreateINIInt("General", "bShowAdditionalToolbarButtons", 0, filename);
 	bAllowMultipleSearchAndReplace = GetOrCreateINIInt("General", "bAllowMultipleSearchAndReplace", 0, filename);
-
 
 	bPatchScriptEditorFont = GetOrCreateINIInt("Script", "bPatchEditorFont", 0, filename);
 	bScriptCompileWarningPopup = GetOrCreateINIInt("Script", "bScriptCompileWarningPopup", 0, filename);
@@ -445,7 +443,7 @@ bool NVSEPlugin_Load(const NVSEInterface * nvse)
 		WriteRelJump(0x41EA30, UInt32(LipGenCountTopicsHook));
 	}
 
-//	WriteRelCall(0x440869, UInt32(CreateMainMenuToolbar));
+	SafeWrite32(0x4411A1, UInt32(RenderWindowCallbackHook));
 
 	//	Create log window - credit to nukem
 	InitCommonControls();

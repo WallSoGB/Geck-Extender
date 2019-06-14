@@ -135,6 +135,7 @@ C:\Modding\MO2\ModOrganizer.exe "moshortcut://Tale of Two Wastelands:x32dbg GECK
     <ClCompile Include="nvse\Utilities.cpp" />
     <ClCompile Include="xutil.cpp" />
     <ClCompile Include="ZeGaryHax.cpp" />
+    <ClCompile Include="ZeLogWindow.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Editor.h" />
@@ -164,6 +165,7 @@ C:\Modding\MO2\ModOrganizer.exe "moshortcut://Tale of Two Wastelands:x32dbg GECK
     <ClInclude Include="nvse\SafeWrite.h" />
     <ClInclude Include="nvse\Utilities.h" />
     <ClInclude Include="resource.h" />
+    <ClInclude Include="Settings.h" />
     <ClInclude Include="UISpeedHooks.h" />
     <ClInclude Include="xutil.h" />
     <ClInclude Include="ZeGaryHax.h" />

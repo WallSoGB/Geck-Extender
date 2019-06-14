@@ -64,6 +64,7 @@
     </ClCompile>
     <ClCompile Include="Editor.cpp" />
     <ClCompile Include="xutil.cpp" />
+    <ClCompile Include="ZeLogWindow.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ZeGaryHax.h" />
@@ -147,6 +148,7 @@
     <ClInclude Include="Editor.h" />
     <ClInclude Include="UISpeedHooks.h" />
     <ClInclude Include="GECKUtility.h" />
+    <ClInclude Include="Settings.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="exports.def" />
