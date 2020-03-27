@@ -117,6 +117,7 @@ C:\Modding\MO2\ModOrganizer.exe "moshortcut://Tale of Two Wastelands:x32dbg GECK
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Editor.cpp" />
+    <ClCompile Include="EditorUIDarkMode.cpp" />
     <ClCompile Include="nvse\GameAPI.cpp" />
     <ClCompile Include="nvse\GameBSExtraData.cpp" />
     <ClCompile Include="nvse\GameData.cpp" />
@@ -143,6 +144,7 @@ C:\Modding\MO2\ModOrganizer.exe "moshortcut://Tale of Two Wastelands:x32dbg GECK
   <ItemGroup>
     <ClInclude Include="DebugCellShaders.h" />
     <ClInclude Include="Editor.h" />
+    <ClInclude Include="EditorUIDarkMode.h" />
     <ClInclude Include="GECKUtility.h" />
     <ClInclude Include="nvse\CommandTable.h" />
     <ClInclude Include="nvse\GameAPI.h" />

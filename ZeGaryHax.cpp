@@ -29,7 +29,7 @@
 #include "Editor.h"
 #include "UISpeedHooks.h"
 #include "DebugCellShaders.h"
-
+//#include "EditorUIDarkMode.h"
 
 const NVSEInterface* savedNVSE = NULL;
 
@@ -611,6 +611,21 @@ bool NVSEPlugin_Load(const NVSEInterface * nvse)
 		SafeWrite32(0x442026, UInt32(faceGenMessage));
 	}
 
+	/*
+	bool bUIDarkTheme = true;
+	if (bUIDarkTheme)
+	{
+		HMODULE comDll = GetModuleHandle("comctl32.dll");
+		Assert(comDll);
+
+		EditorUIDarkMode::Initialize();
+		EditorUIDarkMode::InitializeThread();
+		Detours::IATHook((uint8_t*)comDll, "USER32.dll", "GetSysColor", (uint8_t*)& EditorUIDarkMode::Comctl32GetSysColor);
+		Detours::IATHook((uint8_t*)comDll, "USER32.dll", "GetSysColorBrush", (uint8_t*)& EditorUIDarkMode::Comctl32GetSysColorBrush);
+		Detours::IATDelayedHook((uint8_t*)comDll, "UxTheme.dll", "DrawThemeBackground", (uint8_t*)& EditorUIDarkMode::Comctl32DrawThemeBackground);
+		Detours::IATDelayedHook((uint8_t*)comDll, "UxTheme.dll", "DrawThemeText", (uint8_t*)& EditorUIDarkMode::Comctl32DrawThemeText);
+	}
+	*/
 	//	Create log window - credit to nukem
 	InitCommonControls();
 	LoadLibraryA("MSFTEDIT.dll");
