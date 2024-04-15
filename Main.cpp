@@ -39,6 +39,7 @@
 #include "Settings.h"
 #include "NavMeshPickPreventer.h"
 #include "CustomRenderWindowHotkeys.h"
+#include "RagdollControllerFix.h"
 
 #include "Events/EventManager.h"
 #include "Events/Events.h"
@@ -798,6 +799,8 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 	WriteRelCall(0x4137D5, UInt32(OnInitRenderWindowComboBox));
 
 	CustomRenderWindowHotkeys::Init();
+
+	RagdollControllerFix::Init();
 
 	NavMeshPickPreventer::Init();
 	DataLoadEvent::RegisterCallback(NavMeshPickPreventer::PostLoadPlugins);

@@ -57,6 +57,7 @@ class NiScreenPolygon;
 class NiScreenTexture;
 class NiPSysModifier;
 class NiRenderer;
+class NiDX9Renderer;
 class NiGeometryData;
 
 class bhkNiCollisionObject;
@@ -81,26 +82,26 @@ public:
 	NiAVObject();
 	~NiAVObject();
 
-	virtual void	Unk_23(UInt32 arg1);
-	virtual void	Unk_24(NiMatrix33* arg1, NiVector3* arg2, bool arg3);
-	virtual void	Unk_25(UInt32 arg1);
-	virtual void	Unk_26(UInt32 arg1);
-	virtual void	Unk_27(UInt32 arg1);
-	virtual void	Unk_28(UInt32 arg1, UInt32 arg2, UInt32 arg3);
-	virtual void	Unk_29(UInt32 arg1, UInt32 arg2);
-	virtual void	Unk_2A(UInt32 arg1, UInt32 arg2);
-	virtual void	Unk_2B(UInt32 arg1, UInt32 arg2);
-	virtual void	Unk_2C(UInt32 arg1);
-	virtual void	Unk_2D(UInt32 arg1);
-	virtual void	UpdateTransform(UInt32 arg1);
-	virtual void	Unk_2F(void);
-	virtual void	UpdateBounds(UInt32 arg1);
-	virtual void	Unk_31(UInt32 arg1, UInt32 arg2);
-	virtual void	Unk_32(UInt32 arg1);
-	virtual void	Unk_33(UInt32 arg1);
-	virtual void	Unk_34(void);
-	virtual void	OnVisible(NiCullingProcess* cullingProcess);
-	virtual void	Unk_36(UInt32 arg1);
+	virtual void			UpdateControllers(NiUpdateData& arData);
+	virtual void			ApplyTransform(NiMatrix33& arMat, NiPoint3& arTrn, bool abOnLeft);
+	virtual void			Unk_39();
+	virtual NiAVObject*		GetObject_(const NiFixedString& arName);
+	virtual NiAVObject*		GetObjectByName(const NiFixedString& arName);
+	virtual void			SetSelectiveUpdateFlags(bool& arSelectiveUpdate, BOOL abSelectiveUpdateTransforms, bool& arRigid);
+	virtual void			UpdateDownwardPass(const NiUpdateData& arData, UInt32 auiFlags);
+	virtual void			UpdateSelectedDownwardPass(const NiUpdateData& arData, UInt32 auiFlags);
+	virtual void			UpdateRigidDownwardPass(const NiUpdateData& arData, UInt32 auiFlags);
+	virtual void			UpdatePropertiesDownward(NiPropertyState* apParentState);
+	virtual void			Unk_47();
+	virtual void			UpdateWorldData(const NiUpdateData& arData);
+	virtual void			UpdateWorldBound();
+	virtual void			UpdateTransformAndBounds(const NiUpdateData& arData);
+	virtual void			PreAttachUpdate(NiNode* apEventualParent, const NiUpdateData& arData);
+	virtual void			PreAttachUpdateProperties(NiNode* apEventualParent);
+	virtual void			DetachParent();
+	virtual void			UpdateUpwardPassParent(void* arg);
+	virtual void			OnVisible(NiCullingProcess* apCuller);
+	virtual void			PurgeRendererData(NiDX9Renderer* apRenderer);
 
 	enum
 	{
@@ -138,11 +139,11 @@ public:
 		kNiFlag_UnkBit31 = 0x80000000,
 	};
 
-	NiAVObject* m_parent;				// 18
-	bhkNiCollisionObject* m_collisionObject;		// 1C
-	NiSphere* m_kWorldBound;			// 20
-	DList<NiProperty>		m_propertyList;			// 24
-	UInt32					m_flags;				// 30
+	NiAVObject*						m_parent;				// 18
+	NiPointer<bhkNiCollisionObject>	m_collisionObject;		// 1C
+	NiSphere*						m_kWorldBound;			// 20
+	DList<NiProperty>				m_propertyList;			// 24
+	UInt32							m_flags;				// 30
 	union
 	{
 		struct
@@ -313,22 +314,32 @@ public:
 	NiNode();
 	~NiNode();
 
-	virtual void		AddObject(NiObject * obj, UInt32 arg1);							// 37 verified
-	virtual NiObject *	RemoveObject(NiObject ** out, NiObject* toRemove);				// 38 looks ok
-	virtual void		Unk_38(void);													// 39 either lookup or remove a child.
-	virtual void		Unk_39(void);													// 3A calls 39 then release returned child
-	virtual void		Unk_3A(void);													// 3B
-	virtual bool		Unk_3B(void);
-	virtual bool		Unk_3C(void);
-	virtual bool		Unk_3D(void);
-	virtual bool		Unk_3E(void);
-	virtual bool		Unk_3F(void);
+	virtual void			AttachChild(NiAVObject* apChild, bool abFirstAvail);
+	virtual void			InsertChildAt(UInt32 i, NiAVObject* apChild);
+	virtual void			DetachChild(NiAVObject* apChild, NiPointer<NiAVObject>& aspAVObject);
+	virtual void			DetachChildAlt(NiAVObject* apChild);
+	virtual void			DetachChildAt(UInt32 i, NiPointer<NiAVObject>& aspAVObject);
+	virtual NiAVObject*		DetachChildAtAlt(UInt32 i);
+	virtual void			SetAt(UInt32 i, NiAVObject* apChild, NiPointer<NiAVObject>& aspAVObject);
+	virtual void			SetAtAlt(UInt32 i, NiAVObject* apChild);
+	virtual void			UpdateUpwardPass();
 
-	UInt32						unk0094;	// 094
-	UInt32						unk0098;	// 098
-	NiTArray <NiAVObject *>		m_children;	// 09C
+	NiTArray <NiPointer<NiAVObject>> m_children;
 
 	void SetAlphaRecurse(float alpha) { CdeclCall(0x90A1C0, this, alpha); };
+
+
+	UInt32 GetArrayCount() const {
+		return m_children.GetSize();
+	}
+
+	UInt32 GetChildCount() const {
+		return m_children.GetEffectiveSize();
+	}
+
+	NiAVObject* GetAt(UInt32 i) const {
+		return m_children.GetAt(i).data;
+	}
 
 };	// 0AC
 
@@ -808,3 +819,13 @@ public:
 
 #endif
 class NiWindow;
+
+class bhkRagdollShareData : public NiObject {
+public:
+	class hkaSkeleton*			pRagdollSkeleton;
+	class hkaSkeleton*			pFinalSkeleton;
+	class hkaSkeletonMapper*	pSkeletonMapper10;
+	class hkaSkeletonMapper*	pSkeletonMapper14;
+	class Feedback*				pFeedback;
+	class hkaSkeleton*			pSkeleton1C;
+};

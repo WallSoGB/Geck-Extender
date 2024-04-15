@@ -3,6 +3,7 @@
 #include "GameForms.h"
 #include "GameBSExtraData.h"
 #include "GameExtraData.h"
+#include <xmmintrin.h>
 
 class TESObjectCELL;
 struct ScriptEventList;
@@ -389,19 +390,81 @@ public:
 
 STATIC_ASSERT(sizeof(MagicTarget) == 0x010);
 
+class hkVector4 {
+public:
+	__m128 quad;
+};
+
+class hkMatrix3 {
+public:
+	hkVector4 col0;
+	hkVector4 col1;
+	hkVector4 col2;
+};
+
+class hkStringPtr {
+public:
+	const char* m_stringAndFlag;
+
+	const char* c_str() const {
+		return reinterpret_cast<char*>(UInt32(m_stringAndFlag) & ~1);
+	}
+
+	operator const char* () const {
+		return c_str();
+	}
+};
+
+template <typename T_Data>
+class hkArray {
+public:
+	T_Data* m_data;
+	UInt32	m_size;
+	UInt32	m_capacityAndFlags;
+
+	UInt32 GetSize() const {
+		return m_size;
+	}
+
+	T_Data* GetAt(UInt32 index) const {
+		return &m_data[index];
+	}
+};
+
+class bhkRagdollShareData;
+
+class hkBaseObject {
+public:
+	virtual ~hkBaseObject();
+};
+
+class hkReferencedObject : public hkBaseObject {
+public:
+	virtual UInt32 getClassType();
+	virtual void   calcContentStatistics(void* collector, void* cls);
+
+	UInt16 m_memSizeAndFlags;
+	UInt16 m_usReferenceCount;
+};
+
+class hkaSkeleton : public hkReferencedObject {
+public:
+	hkStringPtr				m_name;
+	hkArray<UInt16>			m_parentIndices;
+	hkArray<void*>			m_bones;
+	hkArray<void*>			m_referencePose;
+	hkArray<UInt32>			m_floatSlots;
+	hkArray<UInt32>			m_localFrames;
+};
+
 class hkaRaycastInterface
 {
 public:
-	hkaRaycastInterface();
-	~hkaRaycastInterface();
-	virtual hkaRaycastInterface*	Destroy(bool doFree);
-	virtual void					Unk_01(void* arg0);
-	virtual void					Unk_02(void);
-
-	// Assumed to be 0x010 bytes due to context where the vftable is used
-	UInt32	unk000[(0x010 - 0x004) >> 2];	// 0000
+	virtual			 ~hkaRaycastInterface();
+	virtual bool*	 castRay(bool*, hkVector4*, hkVector4*, UInt32, float, hkVector4*);
+	virtual bool*	 castRayAlt(bool*, hkVector4*, hkVector4*, UInt32, hkVector4*);
 };
-STATIC_ASSERT(sizeof(hkaRaycastInterface) == 0x010);
+static_assert(sizeof(hkaRaycastInterface) == 0x4);
 
 class bhkRagdollController : public hkaRaycastInterface
 {
@@ -409,13 +472,32 @@ public:
 	bhkRagdollController();
 	~bhkRagdollController();
 
-	UInt32	unk000[(0x021C - 0x010) >> 2];	// 0010
-	UInt8	fill021C[3];					// 021C
-	bool	bool021F;						// 021F	when null assume FIK status is false
-	bool	fikStatus;						// 0220
-	UInt8	fill0221[3];					// 0221
+	bool								bDisableMotors;
+	float								unk008;
+	UInt32								unk00C;
+	hkMatrix3							kWorldFromModel;
+	UInt8								byte040;
+	UInt8								bGrabRelated_0x41;
+	bool								bUseIKSystem;
+	bool								bGrabIK_0x43;
+	bool								unk044;
+	class hkaRagdollInstance*			pRagdollInstance;
+	struct RagdollAnimData*				pRagdollAnimData;
+	UInt8								byte050;
+	UInt8								gap051;
+	UInt8								gap052;
+	UInt8								gap053;
+	void*								pUnk054;
+	NiNode*								pBip01Node;
+	UInt32								unk05C;
+	NiMatrix33							kMatrix060;
+	NiPointer<NiNode>					spDebugLinesNode;
+	UInt32								filler[135];
+	NiPointer<bhkRagdollShareData>		spRagdollShareData; // 0x2A4
 };
-STATIC_ASSERT(sizeof(bhkRagdollController) == 0x0224);
+
+static_assert(offsetof(bhkRagdollController, spDebugLinesNode) == 0x84);
+static_assert(offsetof(bhkRagdollController, spRagdollShareData) == 0x2A4);
 
 class bhkRagdollPenetrationUtil;
 class ActorMover;

@@ -172,6 +172,7 @@
     </ClInclude>
     <ClInclude Include="CustomRenderWindowHotkeys.h" />
     <ClInclude Include="NavMeshPickPreventer.h" />
+    <ClInclude Include="RagdollControllerFix.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="exports.def" />

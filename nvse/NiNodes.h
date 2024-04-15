@@ -449,6 +449,24 @@ class TESObjectCELL;
 class TESObjectREFR;
 class TESEffectShader;
 class ActiveEffect;
+class BSMultiBoundNode;
+class NiTriBasedGeom;
+class NiTriStrips;
+class NiTriShape;
+class BSSegmentedTriShape;
+class BSResizableTriShape;
+class NiParticles;
+class NiLines;
+class bhkBlendCollisionObject;
+class bhkRigidBody;
+class bhkLimitedHingeConstraint;
+class NiObjectGroup;
+class NiCloningProcess;
+class NiViewerStringsArray;
+class NiBound;
+class bhkWorldObject;
+class bhkNiCollisionObject;
+struct NiUpdateData;
 
 // member fn addresses
 #if RUNTIME
@@ -475,8 +493,16 @@ public:
 	virtual void		Destructor(bool freeThis);	// 00
 	virtual void		Free(void);					// 01
 
-//	void		** _vtbl;		// 000
 	UInt32		m_uiRefCount;	// 004 - name known
+
+	inline void IncRefCount() {
+		InterlockedIncrement(&m_uiRefCount);
+	}
+
+	inline void DecRefCount() {
+		if (!InterlockedDecrement(&m_uiRefCount))
+			Free();
+	}
 };
 
 // 008
@@ -486,39 +512,39 @@ public:
 	NiObject();
 	~NiObject();
 
-	virtual NiRTTI *	GetType(void);		// 02
-	virtual NiNode *	GetAsNiNode(void);	// 03 
-	virtual UInt32		Unk_04(void);		// 04
-	virtual UInt32		Unk_05(void);		// 05
-	virtual UInt32		Unk_06(void);		// 06
-	virtual UInt32		Unk_07(void);		// 07
-	virtual UInt32		Unk_08(void);		// 08
-	virtual UInt32		Unk_09(void);		// 09
-	virtual UInt32		Unk_0A(void);		// 0A
-	virtual UInt32		Unk_0B(void);		// 0B
-	virtual UInt32		Unk_0C(void);		// 0C
-	virtual UInt32		Unk_0D(void);		// 0D
-	virtual UInt32		Unk_0E(void);		// 0E
-	virtual UInt32		Unk_0F(void);		// 0F
-	virtual UInt32		Unk_10(void);		// 10
-	virtual UInt32		Unk_11(void);		// 11
-	virtual NiObject *	Copy(void);			// 12 (returns this, GetAsNiObject ?). Big doubt with everything below, except last which is 022
-	virtual void		Load(NiStream * stream);
-	virtual void		PostLoad(NiStream * stream);
-	virtual void		FindNodes(NiStream * stream);	// give NiStream all of the NiNodes we own
-	virtual void		Save(NiStream * stream);
-	virtual bool		Compare(NiObject * obj);
-	virtual void		DumpAttributes(NiTArray <char *> * dst);
-	virtual void		DumpChildAttributes(NiTArray <char *> * dst);
-	virtual void		Unk_1A(void);
-	virtual void		Unk_1B(UInt32 arg);
-	virtual void		Unk_1C(void);
-	virtual void		GetType2(void);					// calls GetType
-	virtual void		Unk_1E(UInt32 arg);
-	virtual void		Unk_1F(void);
-	virtual void		Unk_20(void);
-	virtual void		Unk_21(void);
-	virtual void		Unk_22(void);
+	virtual const NiRTTI*				GetRTTI() const;								
+	virtual NiNode*						IsNiNode() const;								
+	virtual BSFadeNode*					IsFadeNode() const;								
+	virtual BSMultiBoundNode*			IsMultiBoundNode() const;						
+	virtual NiGeometry*					IsGeometry() const;								
+	virtual NiTriBasedGeom*				IsTriBasedGeometry() const;						
+	virtual NiTriStrips*				IsTriStrips() const;							
+	virtual NiTriShape*					IsTriShape() const;								
+	virtual BSSegmentedTriShape*		IsSegmentedTriShape() const;					
+	virtual BSResizableTriShape*		IsResizableTriShape() const;					
+	virtual NiParticles*				IsParticlesGeom() const;						
+	virtual NiLines*					IsLinesGeom() const;							
+	virtual bhkNiCollisionObject*		IsBhkNiCollisionObject() const;					
+	virtual bhkBlendCollisionObject*	IsBhkBlendCollisionObject() const;				
+	virtual bhkRigidBody*				IsBhkRigidBody() const;							
+	virtual bhkLimitedHingeConstraint*	IsBhkLimitedHingeConstraint() const;			
+	virtual NiObject*					CreateClone(NiCloningProcess* apCloning);		
+	virtual void						LoadBinary(NiStream* apStream);					
+	virtual void						LinkObject(NiStream* apStream);					
+	virtual void						RegisterStreamables(NiStream* apStream);		
+	virtual void						SaveBinary(NiStream* apStream);					
+	virtual bool						IsEqual(NiObject* apObject) const;				
+	virtual void						GetViewerStrings(NiViewerStringsArray* apStrings);
+	virtual void						AddViewerStrings(NiViewerStringsArray* apStrings);
+	virtual void						ProcessClone(NiCloningProcess* apCloning);		
+	virtual void						PostLinkObject(NiStream* apStream);				
+	virtual bool						StreamCanSkip();								
+	virtual const NiRTTI*				GetStreamableRTTI();							
+	virtual void						SetBound(NiBound* apNewBound);					
+	virtual void						GetBlockAllocationSize();						
+	virtual NiObjectGroup*				GetGroup();										
+	virtual void						SetGroup(NiObjectGroup* apGroup);				
+	virtual NiControllerManager*		IsControllerManager() const;					
 };
 
 class RefNiObject
@@ -1445,3 +1471,51 @@ public:
 	void					* textureEffectData;		// 48 seen TextureEffectData< BSSahderLightingProperty >, init'd to RefNiObject
 };	// Alloc'd to 6C, 68 is RefNiObject, 60 is Init'd to 1.0, 64 also
 	// 4C is byte, Init'd to 0 for non player, otherwize = Player.1stPersonSkeleton.Flags0030.Bit0 is null
+
+class NiCollisionObject : public NiObject {
+public:
+	NiCollisionObject();
+	virtual ~NiCollisionObject();
+
+	virtual void		SetSceneGraphObject(NiAVObject* apSceneObject);
+	virtual void		UpdateWorldData(NiUpdateData& arData);
+	virtual void		RecreateWorldData();
+	virtual void		LoadBoundingVolume(void* apData);
+	virtual void		Convert(UInt32 uiVersion, void* apData);
+
+	NiAVObject* m_pkSceneObject;
+};
+
+class bhkNiCollisionObject : public NiCollisionObject {
+public:
+	bhkNiCollisionObject();
+	virtual ~bhkNiCollisionObject();
+
+	virtual NiPoint3*	GetVelocity(NiPoint3* outVel);
+	virtual void        hktoNiTransform();
+	virtual void        NitohkTransform();
+	virtual void        ClearVelocities();
+	virtual void        SetMotionType(UInt32 aeType, bhkRigidBody* apBody, bool abUpdateMotion);
+	virtual bool        GetKeyFrame();
+	virtual void        SetTransform(NiTransform& akTransform);
+	virtual bool        GetIncludedInSkeleton();
+	virtual void        SetDebugDisplay(bool abToggle);
+
+	enum Flags {
+		ACTIVE = 1 << 0, // 0x1
+
+		NOTIFY = 1 << 2, // 0x4
+		SET_LOCAL = 1 << 3, // 0x8
+		DEBUG_DISPLAY = 1 << 4, // 0x10
+		USE_VELOCITY = 1 << 5, // 0x20
+		RESET = 1 << 6, // 0x40
+		SYNC_ON_UPDATE = 1 << 7, // 0x80
+		UNK_100 = 1 << 8, // 0x100 BhkBlendCollisionObject related
+		UNK_200 = 1 << 9, // 0x200
+		ANIM_TARGETED = 1 << 10, // 0x400
+		DISMEMBER_LIMB = 1 << 11, // 0x800
+	};
+
+	Bitfield16                  usFlags;
+	NiPointer<bhkWorldObject>   spWorldObject;
+};

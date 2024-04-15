@@ -9,23 +9,23 @@ enum DebugRenderModes {
 
 #define LightingFlags *(UInt32*)0xF23C28
 #define eDebugRenderMode *(DebugRenderModes*)0xF23C04
-#define ShaderConstant_AmbientColor (*(NiColorAlpha*)0xF244E0)
-#define ShaderConstant_AmbientColor30 (*(NiColorAlpha*)0xF2B988)
+#define ShaderConstant_AmbientColor (*(NiColorA*)0xF244E0)
+#define ShaderConstant_AmbientColor30 (*(NiColorA*)0xF2B988)
 
 
 
-static const NiColorAlpha LightCountDebugColors[] = {
-	NiColorAlpha(0.0f, 1.0f, 0.0f, 1.0f),
-	NiColorAlpha(0.0f, 0.8f, 0.2f, 1.0f),
-	NiColorAlpha(0.0f, 0.6f, 0.4f, 1.0f),
-	NiColorAlpha(0.0f, 0.4f, 0.6f, 1.0f),
-	NiColorAlpha(0.0f, 0.2f, 0.8f, 1.0f),
-	NiColorAlpha(0.0f, 0.0f, 1.0f, 1.0f),
-	NiColorAlpha(0.2f, 0.0f, 0.8f, 1.0f),
-	NiColorAlpha(0.4f, 0.0f, 0.6f, 1.0f),
-	NiColorAlpha(0.6f, 0.0f, 0.4f, 1.0f),
-	NiColorAlpha(0.8f, 0.0f, 0.2f, 1.0f),
-	NiColorAlpha(1.0f, 0.0f, 0.0f, 1.0f),
+static const NiColorA LightCountDebugColors[] = {
+	NiColorA(0.0f, 1.0f, 0.0f, 1.0f),
+	NiColorA(0.0f, 0.8f, 0.2f, 1.0f),
+	NiColorA(0.0f, 0.6f, 0.4f, 1.0f),
+	NiColorA(0.0f, 0.4f, 0.6f, 1.0f),
+	NiColorA(0.0f, 0.2f, 0.8f, 1.0f),
+	NiColorA(0.0f, 0.0f, 1.0f, 1.0f),
+	NiColorA(0.2f, 0.0f, 0.8f, 1.0f),
+	NiColorA(0.4f, 0.0f, 0.6f, 1.0f),
+	NiColorA(0.6f, 0.0f, 0.4f, 1.0f),
+	NiColorA(0.8f, 0.0f, 0.2f, 1.0f),
+	NiColorA(1.0f, 0.0f, 0.0f, 1.0f),
 };
 
 
@@ -143,7 +143,7 @@ void inline HandleDebugRender(DWORD* pShader, DWORD* pShaderProperty, DWORD* pRe
 
 	if (eDebugRenderMode == 1 || bAutoColor) {
 		uiLightCount = max(min(uiLightCount, 10), 0);
-		static NiColorAlpha* pAmbientColor = bIs30Shader ? &ShaderConstant_AmbientColor30 : &ShaderConstant_AmbientColor;
+		static NiColorA* pAmbientColor = bIs30Shader ? &ShaderConstant_AmbientColor30 : &ShaderConstant_AmbientColor;
 		*pAmbientColor = LightCountDebugColors[uiLightCount];
 
 		if (bAutoColor) {

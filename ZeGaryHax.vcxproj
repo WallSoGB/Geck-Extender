@@ -274,6 +274,7 @@ copy "$(TargetPath)" "$(FalloutNVPath)\Data\nvse\plugins\$(TargetFileName)"
       <SubType>
       </SubType>
     </ClInclude>
+    <ClInclude Include="RagdollControllerFix.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="Settings.h">
       <SubType>

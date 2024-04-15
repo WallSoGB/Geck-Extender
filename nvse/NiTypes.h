@@ -94,22 +94,31 @@ struct NiViewport
 };
 
 // C
-struct NiColor
-{
+struct NiColor {
+	NiColor() : r(0.f), g(0.f), b(0.f) {};
+	NiColor(float r, float g, float b) : r(r), g(g), b(b) {};
+	NiColor(float r, float g, float b, float a) : r(r), g(g), b(b) {};
+	NiColor(float f) : r(f), g(f), b(f) {};
+
 	float	r;
 	float	g;
 	float	b;
 };
 
 // 10
-struct NiColorAlpha
+struct NiColorA
 {
 	float	r;
 	float	g;
 	float	b;
 	float	a;
 
-	NiColorAlpha(float r, float g, float b, float a) : r(r), g(g), b(b), a(a) {};
+	NiColorA() : r(0.f), g(0.f), b(0.f), a(0.f) {};
+	NiColorA(const NiColor& color) : r(color.r), g(color.g), b(color.b), a(1.0f) {};
+	NiColorA(const NiColor& color, float a) : r(color.r), g(color.g), b(color.b), a(a) {};
+	NiColorA(float r, float g, float b) : r(r), g(g), b(b), a(1.0f) {};
+	NiColorA(float r, float g, float b, float a) : r(r), g(g), b(b), a(a) {};
+	NiColorA(float f) : r(f), g(f), b(f), a(f) {};
 
 	void Scale(float fScale) {
 		r *= fScale;
@@ -136,7 +145,7 @@ template <typename T>
 struct NiTArray
 {
 	void** _vtbl;		// 00
-	T* data;			// 04
+	T*		data;			// 04
 	UInt16	capacity;		// 08 - init'd to size of preallocation
 	UInt16	firstFreeEntry;	// 0A - index of the first free entry in the block of free entries at the end of the array (or numObjs if full)
 	UInt16	numObjs;		// 0C - init'd to 0
@@ -149,10 +158,16 @@ struct NiTArray
 	}
 
 	T Get(UInt32 idx) { return (*this)[idx]; }
+	inline T& GetAt(UInt32 uiIndex) const {
+		return data[uiIndex];
+	}
 
 	UInt16 Length(void) { return firstFreeEntry; }
 	void AddAtIndex(UInt32 index, T* item);	// no bounds checking
 	void SetCapacity(UInt16 newCapacity);	// grow and copy data if needed
+
+	inline UInt16 GetEffectiveSize() const { return numObjs; }
+	inline UInt16 GetSize() const { return firstFreeEntry; }
 };
 
 
@@ -472,6 +487,30 @@ public:
 
 	operator const T*() const { return data; }
 	operator T*() { return data; }
+
+	inline T* operator->() const { return data; }
+
+	__forceinline NiPointer<T>& operator =(const NiPointer& ptr) {
+		if (data != ptr.data) {
+			if (data)
+				data->DecRefCount();
+			data = ptr.data;
+			if (data)
+				data->IncRefCount();
+		}
+		return *this;
+	}
+
+	__forceinline NiPointer<T>& operator =(T* pObject) {
+		if (data != pObject) {
+			if (data)
+				data->DecRefCount();
+			data = pObject;
+			if (data)
+				data->IncRefCount();
+		}
+		return *this;
+	}
 };
 
 // 14
@@ -489,4 +528,87 @@ public:
 	UInt32	unk08;		// 08
 	UInt32	unk0C;		// 0C
 	UInt32	unk10;		// 10
+};
+
+class NiGlobalStringTable {
+public:
+	typedef char* GlobalStringHandle;
+
+	static char* AddString(const char* pcString) {
+		return CdeclCall<char*>(0x81B0C0, pcString);
+	}
+
+	static void IncRefCount(GlobalStringHandle& arHandle) {
+		if (!arHandle)
+			return;
+
+		InterlockedIncrement((size_t*)GetRealBufferStart(arHandle));
+	}
+
+	static void DecRefCount(GlobalStringHandle& arHandle) {
+		if (!arHandle)
+			return;
+
+		InterlockedDecrement((size_t*)GetRealBufferStart(arHandle));
+	}
+
+	static UInt32 GetLength(const GlobalStringHandle& arHandle) {
+		if (!arHandle)
+			return 0;
+
+		return GetRealBufferStart(arHandle)[1];
+	}
+
+	static char* GetRealBufferStart(const GlobalStringHandle& arHandle) {
+		return ((char*)arHandle - 2 * sizeof(size_t));
+	}
+};
+
+
+class NiFixedString {
+public:
+	NiFixedString() {};
+	NiFixedString(const char* apcString) {
+		if (apcString)
+			m_kHandle = NiGlobalStringTable::AddString(apcString);
+		else
+			m_kHandle = nullptr;
+	}
+	NiFixedString(const NiFixedString& arString) {
+		m_kHandle = arString.m_kHandle;
+	}
+	~NiFixedString() {
+		NiGlobalStringTable::DecRefCount(m_kHandle);
+	}
+
+	NiGlobalStringTable::GlobalStringHandle m_kHandle = nullptr;
+
+	NiFixedString& operator=(const char* apcString) {
+		if (m_kHandle != apcString) {
+			char* pHandle = m_kHandle;
+			m_kHandle = NiGlobalStringTable::AddString(apcString);
+			NiGlobalStringTable::DecRefCount(pHandle);
+		}
+		return *this;
+	}
+	NiFixedString& operator=(NiFixedString& arString) {
+		if (m_kHandle != arString.m_kHandle) {
+			char* pHandle = arString.m_kHandle;
+			NiGlobalStringTable::IncRefCount(pHandle);
+			NiGlobalStringTable::DecRefCount(m_kHandle);
+			m_kHandle = pHandle;
+		}
+		return *this;
+	}
+	bool operator==(const NiFixedString& arString) {
+		return !strcmp(m_kHandle, arString.m_kHandle);
+	}
+	bool operator==(const char* apcString) {
+		return !strcmp(m_kHandle, apcString);
+	}
+
+	UInt32 GetLength() const {
+
+	}
+
 };
