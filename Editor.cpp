@@ -3,6 +3,7 @@
 #include <assert.h>
 #include <CommCtrl.h>
 #include "Editor.h"
+#include <GECKUtility.h>
 
 bool g_UseDeferredDialogInsert;
 HWND g_DeferredListView;
@@ -241,4 +242,9 @@ void InsertListViewItem(HWND ListViewHandle, void* Parameter, bool UseImage, int
 	}
 
 	ListView_InsertItem(ListViewHandle, &item);
+}
+
+
+void __fastcall RefSelectControl_SetCurrentCell(void* apThis, void* edx, void* cell) {
+	ThisCall(0x48BDC0, apThis, RenderWindow::GetCurrentCell());
 }

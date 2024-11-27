@@ -987,6 +987,9 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 
 	NavMeshPickPreventer::Init();
 
+	// Forces RefSelectControl to default to current cell instead of the first entry on the list
+	WriteRelCall(0x48C16B, UInt32(RefSelectControl_SetCurrentCell));
+
 	// allow saving as ESM
 	const char* fileExtensions = "ESM Files (*.esm)\0*.esm\0ESP Files (*.esp)\0*.esp\0";
 	const char* fileExtensionsEspFirst = "ESP Files (*.esp)\0*.esp\0ESM Files (*.esm)\0*.esm\0";

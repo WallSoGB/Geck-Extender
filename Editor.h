@@ -6,3 +6,4 @@ void InsertComboBoxItem(HWND ComboBoxHandle, const char* DisplayText, void* Valu
 void BeginUIDefer();
 void EndUIDefer();
 LRESULT WINAPI hk_SendMessageA(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam);
+void __fastcall RefSelectControl_SetCurrentCell(void* apThis, void* edx, void* cell);
