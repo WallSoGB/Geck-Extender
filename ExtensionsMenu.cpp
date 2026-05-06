@@ -46,7 +46,6 @@ HWND g_MainHwnd;
 extern HWND g_ConsoleHwnd;
 HMENU g_ExtensionMenu;
 HMENU g_MainMenu;
-WNDPROC originalMainWindowCallback;
 
 NiPoint3 savedRenderPos;
 NiMatrix33 savedRenderDirection;
@@ -295,6 +294,7 @@ void InjectOpenSettingsMenuItem(HMENU hMenu)
 	}
 }
 
+CallDetour kMainWindowCallback;
 LRESULT CALLBACK MainWindowCallback(HWND Hwnd, UINT Message, WPARAM wParam, LPARAM lParam)
 {
 	if (Message == WM_CREATE)
@@ -736,7 +736,7 @@ LRESULT CALLBACK MainWindowCallback(HWND Hwnd, UINT Message, WPARAM wParam, LPAR
 		char customTitle[256];
 		stbsp_snprintf(customTitle, sizeof(customTitle), "%s -= Extender Rev. 0.49 =-", (const char*)lParam);
 
-		return CallWindowProc(originalMainWindowCallback, Hwnd, Message, wParam, (LPARAM)customTitle);
+		return CallWindowProc(reinterpret_cast<WNDPROC>(kMainWindowCallback.GetOverwrittenAddr()), Hwnd, Message, wParam, (LPARAM)customTitle);
 	}
 	else if (Message == WM_HSCROLL && config.bShowTimeOfDaySlider)
 	{
@@ -786,11 +786,10 @@ LRESULT CALLBACK MainWindowCallback(HWND Hwnd, UINT Message, WPARAM wParam, LPAR
 		prevY = newY;
 	}
 
-	return CallWindowProc(originalMainWindowCallback, Hwnd, Message, wParam, lParam);
+	return CallWindowProc(reinterpret_cast<WNDPROC>(kMainWindowCallback.GetOverwrittenAddr()), Hwnd, Message, wParam, lParam);
 }
 
 void ExtensionsMenu_InitHooks()
 {
-	originalMainWindowCallback = *(WNDPROC*)0x0044612D;
-	SafeWrite32(0x0044612D, (UInt32)MainWindowCallback);
+	kMainWindowCallback.SafeWrite32(0x0044612D, (UInt32)MainWindowCallback);
 }

@@ -3909,8 +3909,31 @@ public:
 
 static_assert(sizeof(TESWorldSpace) == 0xFC);
 
+class TESChildCell {
+public:
+	TESChildCell();
+	~TESChildCell();
+
+	// no virtual destructor
+	virtual TESObjectCELL* GetPersistentCell(void);		// 000
+
+	//	void	** vtbl;	// 00
+};
+
 // TESObjectLAND (2C)
-class TESObjectLAND;
+class TESObjectLAND : public TESForm, public TESChildCell {
+public:
+	struct Data {
+		uint32_t uiFlags;
+	};
+
+
+	TESObjectLAND::Data		kData;
+	TESObjectCELL*			pParentCell;
+	void*					spQueuedTextures;
+	void*					pLoadedData;
+};
+
 
 // NavMesh (108)
 class NavMesh : public TESForm

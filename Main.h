@@ -528,7 +528,7 @@ bool __fastcall GetIsRIL(TESForm* form)
 		{
 			for (tList<ModInfo>::Iterator infoIter = dataHandler->modList.modInfoList.Begin(); !infoIter.End(); ++infoIter)
 			{
-				if (_stricmp(infoIter->name, "Fallout3.esm")) continue;
+				if (_stricmp(infoIter->cFilename, "Fallout3.esm")) continue;
 				RIL_FormID = (infoIter->modIndex << 0x18) | 0x434B;
 				break;
 			}
@@ -1244,6 +1244,7 @@ void __fastcall PreferencesWindowApplyButtonHook(int* thiss, void* dummyEDX, int
 	SendMessageA(g_allowCellWindowLoadsButtonHwnd, BM_SETCHECK, GetIsRenderWindowAllowCellLoads(), NULL);
 }
 
+CallDetour kRenderWindowCallback;
 BOOL __stdcall RenderWindowCallbackHook(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 	if (msg == WM_KEYDOWN) {
 		switch (wParam) {
@@ -1256,7 +1257,7 @@ BOOL __stdcall RenderWindowCallbackHook(HWND hWnd, UINT msg, WPARAM wParam, LPAR
 	else if (msg == WM_RBUTTONDOWN) {
 		SetFlycamMode(0);
 	}
-	return StdCall<LRESULT>(0x455AA0, hWnd, msg, wParam, lParam);
+	return StdCall<LRESULT>(kRenderWindowCallback.GetOverwrittenAddr(), hWnd, msg, wParam, lParam);
 }
 
 class BGSPrimitive;
@@ -1536,7 +1537,7 @@ void __cdecl CrashSaveSetName(char* dst, size_t size, char* format, void* DEFAUL
 	const char* modName = "DEFAULT.esp";
 	if (activeFile)
 	{
-		modName = activeFile->name;
+		modName = activeFile->cFilename;
 	}
 	stbsp_sprintf(dst, "%s", modName);
 }
@@ -2615,7 +2616,7 @@ void PreserveTESFileTimeStamp(ModInfo* apFile, bool State)
 	}
 
 	char filePath[0x200]; *filePath = '\0';
-	stbsp_snprintf(filePath, sizeof(filePath), "%s\\%s", apFile->filepath, apFile->name);
+	stbsp_snprintf(filePath, sizeof(filePath), "%s\\%s", apFile->cPath, apFile->cFilename);
 
 	HANDLE SaveFile = CreateFile(filePath, GENERIC_READ | GENERIC_WRITE, NULL, nullptr, OPEN_EXISTING, 0, nullptr);
 	if (SaveFile == INVALID_HANDLE_VALUE)

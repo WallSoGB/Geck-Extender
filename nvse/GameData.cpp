@@ -14,7 +14,7 @@ public:
 
 	bool Accept(ModInfo* modInfo)
 	{
-		return _stricmp(modInfo->name, m_stringToFind) == 0;
+		return _stricmp(modInfo->cFilename, m_stringToFind) == 0;
 	}
 };
 
@@ -52,7 +52,7 @@ const char* DataHandler::GetNthModName(UInt32 modIndex)
 {
 	const ModInfo** activeModList = GetActiveModList();
 	if (modIndex < GetActiveModCount() && activeModList[modIndex])
-		return activeModList[modIndex]->name;
+		return activeModList[modIndex]->cFilename;
 	else
 		return "";
 }

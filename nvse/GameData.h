@@ -143,25 +143,26 @@ struct ModInfo		// referred to by game as TESFile
 
 	tList<ModInfo>						unkList;			// 000 treated as ModInfo during InitializeForm, looks to be a linked list of modInfo. Also during Save in GECK.
 	UInt32 /*NiTPointerMap<TESFile*>*/	* pointerMap;		// 008
-	UInt32								unk00C;				// 00C
-	BSFile*								unkFile;			// 010
-	UInt32								unk014;				// 014 
-	void								* unk018;			// 018 seen all zeroes. size unknown, seen not valid pointer in FalloutNV.esm
-	void								* unk01C;			// 01C as above
-	char								name[0x104];		// 020
-	char								filepath[0x104];	// 124
-	UInt32								unk228;				// 228
-	UInt32								unk22C;				// Masters are init'd to dword_1186740 (0x2800) same val as BSFile+10? Buffer size ?
-	UInt32								unk230;				// 230
-	UInt32								unk234;				// 234
-	UInt32								unk238;				// 238
-	UInt32								unk23C;				// 23C
+	BSFile*								pLockedFile;
+	BSFile*								pFile;
+	struct TESBitArrayFile*				pFormUserDataBitArray;
+	struct TESBitArrayFile*				pFormVersionBitArray;
+	struct TESBitArrayFile*				pFormIDBitArray;
+	char								cFilename[260];
+	char								cPath[260];
+	char*								pBuffer;
+	uint32_t							uiBufferAllocSize;
+	uint32_t							uiFirstCellOffset;
+	uint32_t							uiCurrCellOffset;
+	TESObjectCELL*						pCurrCell;
+	uint32_t							uiCurrRefOffset;
 	FormInfo							formInfo;			// 240
-	ChunkHeader							subRecordHeader;	// 258
-	UInt32								unk260;				// 260 could be file size, as it is compared with fileOffset during load module. But filesize would be an Int64 !
-	UInt32								fileOffset;			// 264
-	UInt32								dataOffset;			// 268 index into dataBuf
-	UInt32								subrecordBytesRead;	// 26C generates error on Read if != expected length
+	uint32_t							eCurrentChunkID;
+	uint32_t							uiActualChunkSize;
+	uint32_t							uiFileSize;
+	uint32_t							uiFileOffset;
+	uint32_t							uiFormOffset;
+	uint32_t							uiChunkOffset;
 	FormInfo							writeInfo;			// 270 "used" to add record to the plugin.
 	UInt32								writeOffset;		// 288
 	UInt32								subrecordBytesToWrite;	// 28C

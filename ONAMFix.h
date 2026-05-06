@@ -11,7 +11,7 @@ namespace ONAMFix
 	{
 		// If file is newly created, the master flag would not be yet set, that's why checking the extension takes priority
 		// (The flag is set after this patch is called)
-		const char* pFileName = apFile->name;
+		const char* pFileName = apFile->cFilename;
 		if (!pFileName)
 		{
 			return false;

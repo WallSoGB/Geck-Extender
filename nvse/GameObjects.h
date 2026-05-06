@@ -11,19 +11,6 @@ class NiNode;
 class Animation;
 class BSMultiBound;
 
-// 008
-class TESChildCell
-{
-public:
-	TESChildCell();
-	~TESChildCell();
-
-	// no virtual destructor
-	virtual TESObjectCELL *	GetPersistentCell(void);		// 000
-
-//	void	** vtbl;	// 00
-};
-
 // 68
 class TESObjectREFR : public TESForm
 {
